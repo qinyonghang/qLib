@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(common)
-set (LIB_NAME common)
+project(qlib)
+set (LIB_NAME qlib)
 
 include(FetchContent)
 
@@ -37,15 +37,6 @@ message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}.")
 message(STATUS "DFLAGS: ${DFLAGS}")
 
-# find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-# message("Python_INCLUDE_DIRS=" ${Python3_INCLUDE_DIRS})
-# message("Python_LIBRARIES=" ${Python3_LIBRARIES})
-
-# find_package(Boost REQUIRED COMPONENTS python)
-# message("Boost version: ${Boost_VERSION}")
-# message("Boost_INCLUDE_DIR=" ${Boost_INCLUDE_DIR})
-# message("Boost_LIBRARIES=" ${Boost_LIBRARIES})
-
 file(GLOB source_files ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c)
 add_library(${LIB_NAME} STATIC ${source_files})
 
@@ -70,7 +61,8 @@ target_compile_options(${LIB_NAME} PRIVATE
 endif ()
 
 target_include_directories(${LIB_NAME} PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
 if (WITH_BENCHMARK STREQUAL true)
@@ -95,6 +87,7 @@ FetchContent_Declare(spdlog
 )
 set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "Build shared libraries" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
+set(SPDLOG_INSTALL ON CACHE BOOL "Install spdlog" FORCE)
 FetchContent_MakeAvailable(spdlog)
 
 FetchContent_Declare(classic_benchmarks
@@ -114,3 +107,30 @@ if (BUILD_TEST)
     add_executable(test_log src/test/QLogTest.cpp)
     target_link_libraries(test_log PRIVATE ${LIB_NAME})
 endif ()
+
+set(export_dest_dir ${CMAKE_INSTALL_LIBDIR}/cmake/${LIB_NAME})
+set(config_targets_file "${LIB_NAME}ConfigTargets.cmake")
+set(project_config_in "${PROJECT_SOURCE_DIR}/cmake/${LIB_NAME}Config.cmake.in")
+set(project_config_out "${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}Config.cmake")
+
+add_library(${LIB_NAME}_header_only INTERFACE)
+target_include_directories(${LIB_NAME}_header_only INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+                                                          "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+target_link_libraries(${LIB_NAME}_header_only INTERFACE spdlog::spdlog_header_only)
+target_compile_definitions(${LIB_NAME}_header_only INTERFACE ${DFLAGS})
+
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS ${LIB_NAME} ${LIB_NAME}_header_only
+    EXPORT ${LIB_NAME}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+export(TARGETS ${LIB_NAME} ${LIB_NAME}_header_only NAMESPACE ${LIB_NAME}::
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/${config_targets_file}")
+install(EXPORT ${LIB_NAME} DESTINATION ${export_dest_dir} NAMESPACE ${LIB_NAME}:: FILE ${config_targets_file})
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file("${project_config_in}" "${project_config_out}" INSTALL_DESTINATION ${export_dest_dir})
+install(FILES "${project_config_out}" DESTINATION "${export_dest_dir}")

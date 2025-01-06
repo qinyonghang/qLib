@@ -1,0 +1,20 @@
+@PACKAGE_INIT@
+
+set(SPDLOG_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../..)
+find_package(spdlog REQUIRED)
+
+set(config_targets_file @config_targets_file@)
+
+set(LIB_NAME @LIB_NAME@)
+set(${LIB_NAME}_INCLUDE_DIRS @CMAKE_INSTALL_INCLUDEDIR@)
+set(${LIB_NAME}_LIBRARY_DIRS @CMAKE_INSTALL_LIBDIR@)
+set(${LIB_NAME}_LIBRARIES @LIB_NAME@::@LIB_NAME@)
+
+string(TOUPPER ${LIB_NAME} LIB_NAME_UPPER)
+set(${LIB_NAME_UPPER}_INCLUDE_DIRS @CMAKE_INSTALL_INCLUDEDIR@)
+set(${LIB_NAME_UPPER}_LIBRARY_DIRS @CMAKE_INSTALL_LIBDIR@)
+set(${LIB_NAME_UPPER}_LIBRARIES @LIB_NAME@::@LIB_NAME@)
+
+include("${CMAKE_CURRENT_LIST_DIR}/${config_targets_file}")
+
+check_required_components(${LIB_NAME})
