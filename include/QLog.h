@@ -15,6 +15,7 @@
 
 #include "QObject.h"
 #include "QSingletonProductor.h"
+#include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/spdlog.h"
 
 class QLog : public QObject {
@@ -22,55 +23,65 @@ public:
     template <typename... Args>
     using format_string_t = spdlog::format_string_t<Args...>;
 
-    ~QLog() = default;
+    template <typename QString>
+    QLog(QString&& name) {
+#ifdef _WIN32
+        auto color_sink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
+#else
+        auto color_sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
+#endif
+
+        __logger =
+            std::make_shared<spdlog::logger>(std::forward<QString>(name), std::move(color_sink));
+    }
 
     void set_level(size_t level) {
-        spdlog::set_level(static_cast<spdlog::level::level_enum>(level));
+        __logger->set_level(static_cast<spdlog::level::level_enum>(level));
     }
 
     template <typename... Args>
     void trace(format_string_t<Args...> fmt, Args&&... args) {
-        spdlog::trace(fmt, std::forward<Args>(args)...);
+        __logger->trace(fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     void debug(format_string_t<Args...> fmt, Args&&... args) {
-        spdlog::debug(fmt, std::forward<Args>(args)...);
+        __logger->debug(fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     void info(format_string_t<Args...> fmt, Args&&... args) {
-        spdlog::info(fmt, std::forward<Args>(args)...);
+        __logger->info(fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     void warn(format_string_t<Args...> fmt, Args&&... args) {
-        spdlog::warn(fmt, std::forward<Args>(args)...);
+        __logger->warn(fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     void error(format_string_t<Args...> fmt, Args&&... args) {
-        spdlog::error(fmt, std::forward<Args>(args)...);
+        __logger->error(fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     void critical(format_string_t<Args...> fmt, Args&&... args) {
-        spdlog::critical(fmt, std::forward<Args>(args)...);
+        __logger->critical(fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     void log(size_t level, format_string_t<Args...> fmt, Args&&... args) {
-        spdlog::log(static_cast<spdlog::level::level_enum>(level), fmt,
-                    std::forward<Args>(args)...);
+        __logger->log(static_cast<spdlog::level::level_enum>(level), fmt,
+                      std::forward<Args>(args)...);
     }
 
 protected:
-    QLog() : QObject(nullptr) { spdlog::set_level(spdlog::level::info); }
+    std::shared_ptr<spdlog::logger> __logger;
 
     friend class QSingletonProductor<QLog>;
 };
 
-#define qLogger() (QSingletonProductor<QLog>::get_instance())
+#define qLogger() (QSingletonProductor<QLog>::get_instance("default"))
 
 #define qTrace(fmt, ...) qLogger().trace("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 #define qDebug(fmt, ...) qLogger().debug("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)

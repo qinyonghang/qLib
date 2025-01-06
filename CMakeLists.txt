@@ -82,7 +82,7 @@ if (WITH_BENCHMARK STREQUAL true)
     )
 
     target_link_libraries(dhrystone2 PRIVATE -lc -lm)
-    target_link_libraries(${LIB_NAME} PUBLIC dhrystone2)
+    target_link_libraries(${LIB_NAME} PRIVATE dhrystone2)
 endif ()
 
 
@@ -106,3 +106,11 @@ FetchContent_Declare(classic_benchmarks
 )
 
 target_link_libraries(${LIB_NAME} PUBLIC spdlog::spdlog)
+
+option(BUILD_TEST "Build tests" ON)
+if (BUILD_TEST)
+    enable_testing()
+
+    add_executable(test_log src/test/QLogTest.cpp)
+    target_link_libraries(test_log PRIVATE ${LIB_NAME})
+endif ()
