@@ -91,6 +91,7 @@ FetchContent_Declare(spdlog
     URL_HASH SHA256=9962648c9b4f1a7bbc76fd8d9172555bad1871fdb14ff4f842ef87949682caa5
     DOWNLOAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/spdlog
+    DOWNLOAD_EXTRACT_TIMESTAMP true
 )
 set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "Build shared libraries" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
@@ -101,6 +102,7 @@ FetchContent_Declare(classic_benchmarks
     URL_HASH 1c69d7d5450bb1189e16638ed4e426f2329bc1d8203fac1e5ed14a2c3d916083
     DOWNLOAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/classic_benchmarks
+    DOWNLOAD_EXTRACT_TIMESTAMP true
 )
 
 target_link_libraries(${LIB_NAME} PUBLIC spdlog::spdlog)
