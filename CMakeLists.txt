@@ -105,6 +105,12 @@ if (BUILD_TEST)
     enable_testing()
 
     add_executable(test_log src/test/QLogTest.cpp)
+    set_target_properties(test_log PROPERTIES
+        C_STANDARD 99
+        C_STANDARD_REQUIRED ON
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+    )
     target_link_libraries(test_log PRIVATE ${LIB_NAME})
 endif ()
 

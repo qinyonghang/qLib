@@ -15,16 +15,17 @@
 
 #include "QObject.h"
 #include "QSingletonProductor.h"
+#include "spdlog/sinks/wincolor_sink.h"
 #include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/spdlog.h"
 
-class QLog : public QObject {
+class QLogger : public QObject {
 public:
     template <typename... Args>
     using format_string_t = spdlog::format_string_t<Args...>;
 
     template <typename QString>
-    QLog(QString&& name) {
+    QLogger(QString&& name) {
 #ifdef _WIN32
         auto color_sink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
 #else
@@ -78,10 +79,10 @@ public:
 protected:
     std::shared_ptr<spdlog::logger> __logger;
 
-    friend class QSingletonProductor<QLog>;
+    friend class QSingletonProductor<QLogger>;
 };
 
-#define qLogger() (QSingletonProductor<QLog>::get_instance("default"))
+#define qLogger() (QSingletonProductor<QLogger>::get_instance("default"))
 
 #define qTrace(fmt, ...) qLogger().trace("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 #define qDebug(fmt, ...) qLogger().debug("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
