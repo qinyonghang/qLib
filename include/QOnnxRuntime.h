@@ -49,7 +49,7 @@ public:
     QOnnxRuntimeOutputs& outputs() override;
 
 protected:
-    std::shared_ptr<QObject> __impl;
+    QObjectPtr __impl;
 };
 
 template <>

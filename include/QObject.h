@@ -4,11 +4,11 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <memory>
 #include <numeric>
 #include <sstream>
 #include <vector>
-#include <filesystem>
 
 #ifdef WITH_NEON
 #include <arm_neon.h>
@@ -83,6 +83,8 @@ public:
 protected:
     QObject* __parent{nullptr};
 };
+
+using QObjectPtr = std::shared_ptr<QObject>;
 
 template <typename T>
 struct QTraits;

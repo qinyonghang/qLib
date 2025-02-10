@@ -24,7 +24,7 @@ public:
                                                 ssize_t dim = 0);
 
 protected:
-    std::shared_ptr<QObject> __impl;
+    QObjectPtr __impl;
 };
 
 namespace {

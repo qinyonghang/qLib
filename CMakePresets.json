@@ -7,7 +7,7 @@
     },
     "configurePresets": [
         {
-            "name": "Windows64",
+            "name": "windows",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
@@ -30,7 +30,7 @@
             }
         },
         {
-            "name": "Linux",
+            "name": "linux",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
@@ -52,7 +52,7 @@
             }
         },
         {
-            "name": "Linux_Debug",
+            "name": "linux_d",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
@@ -76,21 +76,21 @@
     ],
     "buildPresets": [
         {
-            "name": "Windows64",
-            "configurePreset": "Windows64",
+            "name": "windows",
+            "configurePreset": "windows",
             "configuration": "Release",
             "targets": [
                 "ALL_BUILD"
             ]
         },
         {
-            "name": "Linux",
-            "configurePreset": "Linux",
+            "name": "linux",
+            "configurePreset": "linux",
             "configuration": "Release"
         },
         {
-            "name": "Linux_Debug",
-            "configurePreset": "Linux_Debug",
+            "name": "linux_d",
+            "configurePreset": "linux_d",
             "configuration": "Debug"
         }
     ]

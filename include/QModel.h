@@ -120,7 +120,7 @@ public:
     }
 
 protected:
-    std::shared_ptr<QObject> __impl;
+    QObjectPtr __impl;
 
     virtual int32_t preprocess(QRIType*, QInputs const&) = 0;
     virtual int32_t postprocess(QOutputs*, QROType const&) = 0;
@@ -303,7 +303,7 @@ public:
     }
 
 protected:
-    std::shared_ptr<QObject> __impl;
+    QObjectPtr __impl;
 
     virtual int32_t preprocess(QRIType*, QInputs const&) = 0;
     virtual int32_t postprocess(QOutputs*, QROType const&) = 0;
