@@ -37,27 +37,19 @@ void qthrow_exception(char const* file, int line, format_string_t fmt, Args&&...
     throw QException(file, line, fmt::format(fmt, std::forward<Args>(args)...).c_str());
 }
 
-#define QTHROW_EXCEPTION(fmt, ...) qthrow_exception(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
-
-#define QMTHROW_EXCEPTION(ok, fmt, ...)                                                            \
+#define QTHROW_EXCEPTION(ok, fmt, ...)                                                             \
     do {                                                                                           \
         if (!(ok)) {                                                                               \
-            QTHROW_EXCEPTION("{}: " fmt, __func__, ##__VA_ARGS__);                                 \
+            qthrow_exception(__FILE__, __LINE__, fmt, ##__VA_ARGS__);                              \
         }                                                                                          \
     } while (false)
+
+#define QMTHROW_EXCEPTION(ok, fmt, ...) QTHROW_EXCEPTION(ok, "{}: " fmt, __func__, ##__VA_ARGS__)
 
 #define QCTHROW_EXCEPTION(ok, fmt, ...)                                                            \
-    do {                                                                                           \
-        if (!(ok)) {                                                                               \
-            QTHROW_EXCEPTION("{}: " fmt, typeid(*this).name(), ##__VA_ARGS__);                     \
-        }                                                                                          \
-    } while (false)
+    QTHROW_EXCEPTION(ok, "{}: " fmt, typeid(*this).name(), ##__VA_ARGS__)
 
 #define QCMTHROW_EXCEPTION(ok, fmt, ...)                                                           \
-    do {                                                                                           \
-        if (!(ok)) {                                                                               \
-            QTHROW_EXCEPTION("{}::{}: " fmt, typeid(*this).name(), __func__, ##__VA_ARGS__);       \
-        }                                                                                          \
-    } while (false)
+    QTHROW_EXCEPTION(ok, "{}::{}: " fmt, typeid(*this).name(), __func__, ##__VA_ARGS__)
 
 #endif

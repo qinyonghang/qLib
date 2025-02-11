@@ -235,34 +235,23 @@ QImage::QImage(uint32_t width, uint32_t height, uint32_t type)
 
 QImage::QImage(std::string const& filename, uint32_t width, uint32_t height, uint32_t type) {
     int32_t result{init(filename, width, height, type)};
-    if (result != 0) {
-        std::string message{fmt::format("QImage.QImage() call QImage.init() failed... filename "
-                                        "= {}, width = {}, height = {}, type = {}",
-                                        filename, width, height, type)};
-        QTHROW_EXCEPTION(message.c_str());
-    }
+    QCMTHROW_EXCEPTION(result == 0,
+                       "init return {}... filename = {}, width = {}, height = {}, type = {}",
+                       result, filename, width, height, type);
 }
 
 QImage::QImage(uint8_t* data, uint32_t width, uint32_t height, uint32_t type) {
     int32_t result{init(data, width, height, type)};
-    if (result != 0) {
-        std::string message{fmt::format("QImage.QImage() call QImage.init() failed... data "
-                                        "= {}, width = {}, height = {}, type = {}",
-                                        static_cast<void*>(data), width, height, type)};
-        QTHROW_EXCEPTION(message.c_str());
-    }
+    QCMTHROW_EXCEPTION(result == 0,
+                       "init return {}... data = {}, width = {}, height = {}, type = {}", result,
+                       static_cast<void*>(data), width, height, type);
 }
 
 #ifdef WITH_OPENCV
 QImage::QImage(cv::Mat const& image) {
     int32_t result{init(image.data, image.cols, image.rows, QIMAGE_TYPE_BGR888)};
-    if (result != 0) {
-        std::string message{fmt::format("QImage.QImage() call QImage.init() failed... image"
-                                        "= cv::Mat({},{},{},{})",
-                                        static_cast<void*>(image.data), image.cols, image.rows,
-                                        image.type())};
-        QTHROW_EXCEPTION(message.c_str());
-    }
+    QCMTHROW_EXCEPTION(result == 0, "init return {}... data = {}, width = {}, height = {}", result,
+                       static_cast<void*>(image.data), image.cols, image.rows);
 }
 #endif
 
@@ -278,19 +267,17 @@ int32_t QImage::init(std::string const& filename, uint32_t width, uint32_t heigh
                     break;
                 }
                 __impl = impl;
+                __width = width;
+                __height = height;
+                __type = type;
                 break;
             }
 
             default: {
-                std::string message{
-                    fmt::format("QImage.init() Parameter type is invalid... type = {}", type)};
-                QTHROW_EXCEPTION(message.c_str());
+                result = -1;
             }
         }
 
-        __width = width;
-        __height = height;
-        __type = type;
     } while (0);
 
     return result;
@@ -321,19 +308,16 @@ int32_t QImage::init(uint8_t* data, uint32_t width, uint32_t height, uint32_t ty
                     memcpy(impl.get(), data, size);
                 }
                 __impl = impl;
+                __width = width;
+                __height = height;
+                __type = type;
                 break;
             }
 
             default: {
-                std::string message{
-                    fmt::format("QImage.init() Parameter type is invalid... type = {}", type)};
-                QTHROW_EXCEPTION(message.c_str());
+                result = -1;
             }
         }
-
-        __width = width;
-        __height = height;
-        __type = type;
 
     } while (0);
 
@@ -390,25 +374,21 @@ int32_t QImage::convert(uint32_t type) {
 
 template <>
 void QResize<QImage, QImage>::operator()(QImage* dst, QImage const& src) {
-    if (src.type() != QImage::QIMAGE_TYPE_RGB888 || dst->type() != QImage::QIMAGE_TYPE_RGB888) {
-        std::string message{fmt::format("QResize() fail... src: ({},{},{}), dst: ({},{},{})",
-                                        src.type(), src.width(), src.height(), dst->type(),
-                                        dst->width(), dst->height())};
-        QTHROW_EXCEPTION(message.c_str());
-    }
+    QCMTHROW_EXCEPTION(
+        (src.type() != QImage::QIMAGE_TYPE_RGB888 || dst->type() != QImage::QIMAGE_TYPE_RGB888),
+        "check parameter fail... src: ({},{},{}), dst: ({},{},{})", src.type(), src.width(),
+        src.height(), dst->type(), dst->width(), dst->height());
 
     resize(dst->data(), dst->width(), dst->height(), src.data(), src.width(), src.height());
 }
 
 template <>
 void QCrop<QImage, QImage>::operator()(QImage* dst, QImage const& src, uint32_t x, uint32_t y) {
-    if (src.type() != QImage::QIMAGE_TYPE_RGB888 || dst->type() != QImage::QIMAGE_TYPE_RGB888 ||
-        x + dst->width() > src.width() || y + dst->height() > src.height()) {
-        std::string message{fmt::format("QCrop() fail... src: ({},{},{}), dst: ({},{},{})",
-                                        src.type(), src.width(), src.height(), dst->type(),
-                                        dst->width(), dst->height())};
-        QTHROW_EXCEPTION(message.c_str());
-    }
+    QCMTHROW_EXCEPTION(
+        (src.type() != QImage::QIMAGE_TYPE_RGB888 || dst->type() != QImage::QIMAGE_TYPE_RGB888 ||
+         x + dst->width() > src.width() || y + dst->height() > src.height()),
+        "check parameter fail... src: ({},{},{}), dst: ({},{},{})", src.type(), src.width(),
+        src.height(), dst->type(), dst->width(), dst->height());
 
     crop(dst->data(), dst->width(), dst->height(), src.data(), src.width(), src.height(), x, y);
 }
