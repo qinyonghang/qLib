@@ -15,9 +15,19 @@
 
 #include "QObject.h"
 #include "QSingletonProductor.h"
+#ifdef _WIN32
 #include "spdlog/sinks/wincolor_sink.h"
+#else
 #include "spdlog/sinks/ansicolor_sink.h"
+#endif
 #include "spdlog/spdlog.h"
+
+template <>
+struct fmt::formatter<std::filesystem::path> : public fmt::formatter<std::string> {
+    auto format(std::filesystem::path const& path, format_context& ctx) const {
+        return fmt::formatter<std::string>::format(path.string(), ctx);
+    }
+};
 
 class QLogger : public QObject {
 public:
@@ -82,7 +92,9 @@ protected:
     friend class QSingletonProductor<QLogger>;
 };
 
-#define qLogger() (QSingletonProductor<QLogger>::get_instance("default"))
+static QLogger& qLogger() {
+    return QSingletonProductor<QLogger>::get_instance("default");
+}
 
 #define qTrace(fmt, ...) qLogger().trace("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 #define qDebug(fmt, ...) qLogger().debug("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
@@ -112,5 +124,5 @@ protected:
 #define qCMInfo(fmt, ...) qInfo("{}::{}: " fmt, typeid(*this).name(), __func__, ##__VA_ARGS__)
 #define qCMWarn(fmt, ...) qWarn("{}::{}: " fmt, typeid(*this).name(), __func__, ##__VA_ARGS__)
 #define qCMError(fmt, ...) qError("{}::{}: " fmt, typeid(*this).name(), __func__, ##__VA_ARGS__)
-#define qCMCCritical(fmt, ...)                                                                     \
+#define qCMCritical(fmt, ...)                                                                      \
     qCritical("{}::{}: " fmt, typeid(*this).name(), __func__, ##__VA_ARGS__)
