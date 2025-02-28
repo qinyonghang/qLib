@@ -37,10 +37,12 @@ void qthrow_exception(char const* file, int line, format_string_t fmt, Args&&...
     throw QException(file, line, fmt::format(fmt, std::forward<Args>(args)...).c_str());
 }
 
+};  // namespace qlib
+
 #define QTHROW_EXCEPTION(ok, fmt, ...)                                                             \
     do {                                                                                           \
         if (!(ok)) {                                                                               \
-            qthrow_exception(__FILE__, __LINE__, fmt, ##__VA_ARGS__);                              \
+            qlib::qthrow_exception(__FILE__, __LINE__, fmt, ##__VA_ARGS__);                        \
         }                                                                                          \
     } while (false)
 
@@ -51,7 +53,5 @@ void qthrow_exception(char const* file, int line, format_string_t fmt, Args&&...
 
 #define QCMTHROW_EXCEPTION(ok, fmt, ...)                                                           \
     QTHROW_EXCEPTION(ok, "{}::{}: " fmt, typeid(*this).name(), __func__, ##__VA_ARGS__)
-
-};  // namespace qlib
 
 #endif
