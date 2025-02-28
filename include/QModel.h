@@ -13,6 +13,7 @@
 #include "QObject.h"
 #include "QTimeProfile.h"
 
+namespace qlib {
 template <typename QDerived>
 class QModelRuntime : public QObject {
 public:
@@ -308,3 +309,5 @@ protected:
     virtual int32_t preprocess(QRIType*, QInputs const&) = 0;
     virtual int32_t postprocess(QOutputs*, QROType const&) = 0;
 };
+
+};  // namespace qlib

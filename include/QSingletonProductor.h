@@ -2,10 +2,11 @@
 
 #include "QObject.h"
 
-template <typename QType>
+namespace qlib {
+template <typename T>
 class QSingletonProductor final : public QObject {
 protected:
-    QType __instance;
+    T __impl;
 
     QSingletonProductor() = default;
     QSingletonProductor(QSingletonProductor const&) = default;
@@ -14,19 +15,21 @@ protected:
     QSingletonProductor& operator=(QSingletonProductor&&) = default;
 
     template <typename... QArgs>
-    QSingletonProductor(QArgs&&... args) : __instance{std::forward<QArgs>(args)...} {}
+    QSingletonProductor(QArgs&&... args) : __impl{std::forward<QArgs>(args)...} {}
 
 public:
-    static QType& get_instance() {
-        static QSingletonProductor<QType> productor;
-        return productor.__instance;
+    static T& get_instance() {
+        static QSingletonProductor<T> productor;
+        return productor.__impl;
     }
 
     template <typename... QArgs>
-    static QType& get_instance(QArgs&&... args) {
-        static QSingletonProductor<QType> productor{std::forward<QArgs>(args)...};
-        return productor.__instance;
+    static T& get_instance(QArgs&&... args) {
+        static QSingletonProductor<T> productor{std::forward<QArgs>(args)...};
+        return productor.__impl;
     }
 
     ~QSingletonProductor() = default;
 };
+
+};  // namespace qlib

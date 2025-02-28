@@ -6,6 +6,7 @@
 #include "QLog.h"
 #include "QObject.h"
 
+namespace qlib {
 class QTimeProfile : public QObject {
 public:
     QTimeProfile(std::string const& module = "None")
@@ -21,3 +22,5 @@ protected:
     std::string __module;
     std::chrono::high_resolution_clock::time_point __now;
 };
+
+};  // namespace qlib

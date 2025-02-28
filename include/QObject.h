@@ -12,29 +12,55 @@
 
 #ifdef WITH_NEON
 #include <arm_neon.h>
-#else
+#endif
+
+namespace qlib {
+
+#ifndef WITH_NEON
 using float32_t = float;
 using float64_t = double;
 #endif
 
-template <typename Type>
-bool exists(Type&& _path) {
+
+template <typename, typename = void>
+struct has_c_str : std::false_type {};
+
+template <typename T>
+struct has_c_str<T, std::void_t<decltype(std::declval<T>().c_str())>> : std::true_type {};
+
+template <typename T>
+constexpr bool has_c_str_v = has_c_str<T>::value;
+
+template <typename, typename = void>
+struct has_string : std::false_type {};
+
+template <typename T>
+struct has_string<T, std::void_t<decltype(std::declval<T>().string())>> : std::true_type {};
+
+template <typename T>
+constexpr bool has_string_v = has_string<T>::value;
+
+template <typename String>
+constexpr bool is_string_v = (has_c_str_v<String> || std::is_convertible_v<String, char const*>);
+
+template <typename T>
+inline bool exists(T&& _path) {
     std::filesystem::path path{_path};
     return std::filesystem::exists(path);
 }
 
-template <typename Type>
-inline Type align(Type value, size_t alignment) {
+template <typename T>
+inline T align(T value, size_t alignment) {
     return (((value) + ((alignment)-1)) & ~((alignment)-1));
 }
 
-template <typename Type>
-inline Type align_32(Type value) {
+template <typename T>
+inline T align_32(T value) {
     return align(value, 32);
 }
 
-template <typename Type>
-std::string serialize(Type const* value, size_t size) {
+template <typename T>
+inline auto serialize(T const* value, size_t size) {
     std::stringstream out{};
 
     out << "[";
@@ -50,23 +76,23 @@ std::string serialize(Type const* value, size_t size) {
 }
 
 template <typename QVec>
-std::string serialize(QVec const& arr) {
+auto serialize(QVec const& arr) {
     return serialize(arr.data(), arr.size());
 }
 
-template <typename Type = float64_t>
-Type sigmoid(Type x) {
-    return static_cast<Type>(1.0) / (static_cast<Type>(1.0) + exp(-x));
+template <typename T = float64_t>
+T sigmoid(T x) {
+    return static_cast<T>(1.0) / (static_cast<T>(1.0) + exp(-x));
 }
 
-template <typename Type = float64_t>
-std::tuple<std::vector<Type>, std::vector<size_t>> topk(std::vector<Type> const& vec, size_t k) {
+template <typename T = float64_t>
+std::tuple<std::vector<T>, std::vector<size_t>> topk(std::vector<T> const& vec, size_t k) {
     std::vector<int> indices(vec.size());
     std::iota(indices.begin(), indices.end(), 0);
     std::partial_sort(indices.begin(), indices.begin() + k, indices.end(),
                       [&vec](int a, int b) { return vec[a] > vec[b]; });
 
-    std::vector<Type> topk_values(k);
+    std::vector<T> topk_values(k);
     std::vector<size_t> topk_indices(k);
     for (auto i = 0u; i < k; ++i) {
         topk_values[i] = vec[indices[i]];
@@ -77,7 +103,7 @@ std::tuple<std::vector<Type>, std::vector<size_t>> topk(std::vector<Type> const&
 
 class QObject {
 public:
-    QObject(QObject* parent = nullptr);
+    QObject(QObject* parent = nullptr) : __parent{parent} {}
     virtual ~QObject() = 0;
 
 protected:
@@ -94,3 +120,5 @@ class QAlgorithm : public QObject {
 public:
     virtual typename QTraits<QDerived>::return_type operator()() = 0;
 };
+
+};  // namespace qlib

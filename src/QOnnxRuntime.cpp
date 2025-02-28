@@ -10,6 +10,7 @@
 #include "QException.h"
 #include "QLog.h"
 
+namespace qlib {
 namespace {
 void dump_values(std::string const& path, Ort::Value const& value) {
     auto mem_size = value.GetTensorTypeAndShapeInfo().GetElementCount();
@@ -193,4 +194,5 @@ QOnnxRuntimeOutputs& QOnnxRuntime<false>::outputs() {
     return *impl->outputs;
 }
 
+};  // namespace qlib
 #endif

@@ -1,83 +1,111 @@
 #pragma once
 
-#include <sys/stat.h>
-
-#include <memory>
-#include <string>
 #include <fstream>
 
-#include "QObject.h"
 #include "QException.h"
+#include "QObject.h"
 
-template <typename QType = uint8_t>
+namespace qlib {
+
+template <typename T = std::string>
 class QLoader final : public QObject {
-public:
-    using QObject::QObject;
-
-    QLoader(std::string const& filepath, QObject* parent = nullptr);
-    ~QLoader() = default;
-
-    int init(std::string const& filepath);
-
-    std::vector<QType>& data();
-    std::vector<QType> const& data() const { return const_cast<QLoader*>(this)->data(); }
-
 protected:
-    struct QLoaderImpl : public QObject {
-        std::vector<QType> data;
+    struct Impl : public QObject {
+        std::vector<T> data;
     };
 
     QObjectPtr __impl;
+
+public:
+    using Base = QObject;
+    using Self = QLoader<T>;
+    using Base::Base;
+
+    int32_t init(char const* path) {
+        int32_t result{0};
+
+        do {
+            auto impl = std::make_shared<Impl>();
+
+            std::ifstream file{path, std::ios::binary | std::ios::ate};
+            if (!file.is_open()) {
+                result = -2;
+                break;
+            }
+
+            auto size = static_cast<size_t>(file.tellg());
+            QTHROW_EXCEPTION(!(size % sizeof(T)), "size is not multiple of {}", sizeof(T));
+            impl->data.resize(size / sizeof(T));
+
+            file.seekg(0, std::ios::beg);
+            file.read(reinterpret_cast<char*>(impl->data.data()), size);
+            if (file.bad()) {
+                result = -3;
+                break;
+            }
+
+            __impl = impl;
+        } while (0);
+
+        return result;
+    }
+
+    template <class Path, class = std::enable_if_t<!std::is_convertible_v<Path, char const*>>>
+    int32_t init(Path&& path) {
+        int32_t result{-1};
+
+        if constexpr (has_string_v<Path>) {
+            result = init(path.string());
+        } else if constexpr (has_c_str_v<Path>) {
+            result = init(path.c_str());
+        }
+
+        return result;
+    }
+
+    template <class... Args>
+    QLoader(Args&&... args) {
+        int32_t result{init(std::forward<Args>(args)...)};
+        QCMTHROW_EXCEPTION(0 == result, "init return {}... ", result);
+    }
+
+    auto& data() {
+        auto impl = std::static_pointer_cast<Impl>(__impl);
+        QTHROW_EXCEPTION(impl, "impl is nullptr");
+        return impl->data;
+    }
+
+    auto const& data() const { return const_cast<Self*>(this)->data(); }
+
+    template <class... Args>
+    static auto load(Args&&... args) {
+        return Self{std::forward<Args>(args)...}.data();
+    }
 };
 
-template <typename QType>
-QLoader<QType>::QLoader(std::string const& filepath, QObject* parent) : QObject(parent) {
-    int32_t result(init(filepath));
-    if (result != 0) {
-        QCMTHROW_EXCEPTION("init return {}... model_path = {}", result, filepath);
-        return;
-    }
-}
+template <>
+struct QLoader<std::string>::Impl : public QObject {
+    std::string data;
+};
 
-template <typename QType>
-int32_t QLoader<QType>::init(std::string const& filepath) {
+template <>
+int32_t QLoader<std::string>::init(char const* path) {
     int32_t result{0};
 
     do {
-        struct stat st;
-        if (stat(filepath.c_str(), &st) != 0) {
+        std::ifstream file{path};
+        if (!file.is_open()) {
             result = -1;
             break;
         }
 
-        auto impl = std::make_shared<QLoaderImpl>();
-
-        impl->data.resize(st.st_size / sizeof(QType));
-
-        std::ifstream file{filepath};
-        if (!file.is_open()) {
-            result = -2;
-            break;
-        }
-
-        file.read(reinterpret_cast<char*>(impl->data.data()), st.st_size);
-        if (file.bad()) {
-            result = -3;
-            break;
-        }
-
+        auto impl = std::make_shared<Impl>();
+        impl->data =
+            std::string{std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
         __impl = impl;
     } while (0);
 
     return result;
 }
 
-template <typename QType>
-std::vector<QType>& QLoader<QType>::data() {
-    auto impl = std::dynamic_pointer_cast<QLoaderImpl>(__impl);
-    if (!impl) {
-        QCMTHROW_EXCEPTION("impl is nullptr");
-    }
-
-    return impl->data;
-}
+};  // namespace qlib

@@ -9,6 +9,7 @@
 #include "QImage.h"
 #include "QLog.h"
 
+namespace qlib {
 template <typename QType = uint8_t>
 class QTensor : public QObject {
 public:
@@ -18,10 +19,10 @@ public:
     std::vector<size_t> shape() const;
 
     int32_t init(std::vector<size_t> const& shape);
-    std::pair<std::vector<QTensor>, bool> split(ssize_t dim = 0);
-    std::pair<std::vector<QTensor>, bool> split(size_t split_size = 1, ssize_t dim = 0);
+    std::pair<std::vector<QTensor>, bool> split(int64_t dim = 0);
+    std::pair<std::vector<QTensor>, bool> split(size_t split_size = 1, int64_t dim = 0);
     std::pair<std::vector<QTensor>, bool> split(std::vector<size_t> const& split_size,
-                                                ssize_t dim = 0);
+                                                int64_t dim = 0);
 
 protected:
     QObjectPtr __impl;
@@ -69,7 +70,7 @@ int32_t QTensor<QType>::init(std::vector<size_t> const& shape) {
 }
 
 template <typename QType>
-std::pair<std::vector<QTensor<QType>>, bool> QTensor<QType>::split(ssize_t dim) {
+std::pair<std::vector<QTensor<QType>>, bool> QTensor<QType>::split(int64_t dim) {
     std::vector<QTensor<QType>> result;
     bool check{true};
 
@@ -84,3 +85,5 @@ std::pair<std::vector<QTensor<QType>>, bool> QTensor<QType>::split(ssize_t dim) 
 
     return std::make_pair(result, check);
 }
+
+};  // namespace qlib

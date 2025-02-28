@@ -7,6 +7,7 @@
 #include "QException.h"
 #include "QLog.h"
 
+namespace qlib {
 namespace {
 
 int32_t read_nv12(std::shared_ptr<uint8_t>* image,
@@ -392,3 +393,5 @@ void QCrop<QImage, QImage>::operator()(QImage* dst, QImage const& src, uint32_t 
 
     crop(dst->data(), dst->width(), dst->height(), src.data(), src.width(), src.height(), x, y);
 }
+
+};  // namespace qlib

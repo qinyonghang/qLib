@@ -16,6 +16,8 @@
 
 #include "spdlog/spdlog.h"
 
+namespace qlib {
+
 #define QMESSAGE_MAX_LENGTH (512)
 
 class QException final : public std::exception {
@@ -27,12 +29,10 @@ public:
         snprintf(__what, sizeof(__what), "[%s:%d]%s", file, line, message);
     }
 
-    ~QException() = default;
-
     char const* what() const noexcept override { return __what; }
 };
 
-template <typename format_string_t, typename... Args>
+template <class format_string_t, class... Args>
 void qthrow_exception(char const* file, int line, format_string_t fmt, Args&&... args) {
     throw QException(file, line, fmt::format(fmt, std::forward<Args>(args)...).c_str());
 }
@@ -51,5 +51,7 @@ void qthrow_exception(char const* file, int line, format_string_t fmt, Args&&...
 
 #define QCMTHROW_EXCEPTION(ok, fmt, ...)                                                           \
     QTHROW_EXCEPTION(ok, "{}::{}: " fmt, typeid(*this).name(), __func__, ##__VA_ARGS__)
+
+};  // namespace qlib
 
 #endif

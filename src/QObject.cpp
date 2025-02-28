@@ -1,5 +1,5 @@
 #include "QObject.h"
 
-QObject::QObject(QObject* parent) : __parent{parent} {}
-
+namespace qlib {
 QObject::~QObject() = default;
+};

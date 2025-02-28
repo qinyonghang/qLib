@@ -5,6 +5,7 @@
 
 #include "QObject.h"
 
+namespace qlib {
 template <typename QOutStream>
 class QProgressBar : public QObject {
 public:
@@ -50,3 +51,5 @@ public:
     QProgressBarStdStream(size_t total, size_t width = 50)
             : QProgressBar(total, width, std::cout) {}
 };
+
+};  // namespace qlib

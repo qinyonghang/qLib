@@ -29,13 +29,14 @@ struct fmt::formatter<std::filesystem::path> : public fmt::formatter<std::string
     }
 };
 
+namespace qlib {
 class QLogger : public QObject {
 public:
     template <typename... Args>
     using format_string_t = spdlog::format_string_t<Args...>;
 
-    template <typename QString>
-    QLogger(QString&& name) {
+    template <typename String>
+    QLogger(String&& name) {
 #ifdef _WIN32
         auto color_sink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
 #else
@@ -43,7 +44,7 @@ public:
 #endif
 
         __logger =
-            std::make_shared<spdlog::logger>(std::forward<QString>(name), std::move(color_sink));
+            std::make_shared<spdlog::logger>(std::forward<String>(name), std::move(color_sink));
     }
 
     void set_level(size_t level) {
@@ -92,16 +93,24 @@ protected:
     friend class QSingletonProductor<QLogger>;
 };
 
-static QLogger& qLogger() {
+static inline QLogger& default_logger() {
     return QSingletonProductor<QLogger>::get_instance("default");
 }
 
-#define qTrace(fmt, ...) qLogger().trace("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
-#define qDebug(fmt, ...) qLogger().debug("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
-#define qInfo(fmt, ...) qLogger().info("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
-#define qWarn(fmt, ...) qLogger().warn("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
-#define qError(fmt, ...) qLogger().error("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
-#define qCritical(fmt, ...) qLogger().critical("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+};  // namespace qlib
+
+#define qTrace(fmt, ...)                                                                           \
+    qlib::default_logger().trace("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+#define qDebug(fmt, ...)                                                                           \
+    qlib::default_logger().debug("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+#define qInfo(fmt, ...)                                                                            \
+    qlib::default_logger().info("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+#define qWarn(fmt, ...)                                                                            \
+    qlib::default_logger().warn("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+#define qError(fmt, ...)                                                                           \
+    qlib::default_logger().error("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+#define qCritical(fmt, ...)                                                                        \
+    qlib::default_logger().critical("[{}:{}]" fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
 #endif
 

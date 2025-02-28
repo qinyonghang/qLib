@@ -9,6 +9,7 @@
 #include "opencv2/opencv.hpp"
 #endif
 
+namespace qlib {
 class QImage : public QObject {
 public:
     enum : uint32_t {
@@ -76,3 +77,5 @@ public:
 
 template <>
 void QCrop<QImage, QImage>::operator()(QImage* dst, QImage const& src, uint32_t x, uint32_t y);
+
+};  // namespace qlib

@@ -5,6 +5,7 @@
 #include "QModel.h"
 #include "onnxruntime_cxx_api.h"
 
+namespace qlib {
 using QOnnxRuntimeInputs = std::vector<Ort::Value>;
 using QOnnxRuntimeOutputs = std::vector<Ort::Value>;
 
@@ -93,5 +94,7 @@ public:
         return result;
     }
 };
+
+};  // namespace qlib
 
 #endif

@@ -15,7 +15,7 @@
             },
             "displayName": "Windows64 Configuration",
             "description": "Windows64 configuration for building the project.",
-            "binaryDir": "${sourceDir}/build",
+            "binaryDir": "${sourceDir}/build/windows",
             "generator": "Visual Studio 17 2022",
             "architecture": "x64",
             "cacheVariables": {
@@ -38,7 +38,7 @@
             },
             "displayName": "Linux Configuration",
             "description": "Linux configuration for building the project.",
-            "binaryDir": "${sourceDir}/build",
+            "binaryDir": "${sourceDir}/build/linux",
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": {
@@ -52,7 +52,7 @@
             }
         },
         {
-            "name": "linux_d",
+            "name": "dlinux",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
@@ -60,7 +60,7 @@
             },
             "displayName": "Linux Debug Configuration",
             "description": "Linux Debug configuration for building the project.",
-            "binaryDir": "${sourceDir}/build",
+            "binaryDir": "${sourceDir}/build/dlinux",
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": {
@@ -89,8 +89,8 @@
             "configuration": "Release"
         },
         {
-            "name": "linux_d",
-            "configurePreset": "linux_d",
+            "name": "dlinux",
+            "configurePreset": "dlinux",
             "configuration": "Debug"
         }
     ]
