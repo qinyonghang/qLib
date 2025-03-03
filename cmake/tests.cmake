@@ -24,5 +24,8 @@ if (BUILD_TEST)
             RUNTIME_OUTPUT_DIRECTORY "${out_dir}"
         )
         target_link_libraries(${test_name} PRIVATE qlib::qlib)
+        if(MSVC)
+            target_compile_options(${test_name} PRIVATE /utf-8)
+        endif()
     endforeach()
 endif ()
