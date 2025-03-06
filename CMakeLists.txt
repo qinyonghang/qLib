@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 project(qlib)
 set(LIB_NAME qlib)
 
+option(CMAKE_POSITION_INDEPENDENT_CODE "Build as a PIC library" ON)
+
 if (NOT DEFINED CONFIG_PATH)
 message(STATUS "Using default config.")
 include(cmake/config.cmake)

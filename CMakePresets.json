@@ -26,6 +26,10 @@
                 "CMAKE_INSTALL_PREFIX": {
                     "type": "STRING",
                     "value": "${sourceDir}/install"
+                },
+                "CMAKE_MSVC_RUNTIME_LIBRARY": {
+                    "type": "STRING",
+                    "value": "MultiThreaded"
                 }
             }
         },
